@@ -3,7 +3,7 @@
 #include <vector>
 
 class KMeans {
-    typedef     double                    Data;
+    typedef     double                  Data;
     typedef     std::vector <Data>      Vector;
     typedef     std::vector <Vector>    DataSet;
     typedef     std::vector <Vector>    Clusters;
@@ -18,6 +18,8 @@ private:
     double getWCSS(const DataSet &dataset, const Tag &tag, const Clusters &clusters);
     void assignment(const DataSet &dataset, Tag &tag, const Clusters &clusters);
     void update(const DataSet &dataset, const Tag &tag, Clusters &clusters);
+
+    size_t getClusterOfMinDis(const Vector &vec, const Clusters &clusters);
 };
 
 // K-Means.cpp
@@ -47,7 +49,7 @@ KMeans::Clusters KMeans::cluster(const DataSet &dataset, Tag &tag, size_t k) {
         assignment(dataset, tag, clusters);
         update(dataset, tag, clusters);
 
-        if(fabs(last_wcss - getWCSS(dataset, tag, clusters))) {
+        if(fabs(last_wcss - getWCSS(dataset, tag, clusters)) <= EPS) {
             break;
         }
     }
@@ -72,4 +74,26 @@ double KMeans::getWCSS(const DataSet &dataset, const Tag &tag, const Clusters &c
         wcss += getDistance2(dataset[i], clusters[tag[i]]);
     }
     return wcss;
+}
+
+size_t KMeans::getClusterOfMinDis(const Vector &vec, const Clusters &clusters) {
+    double min_dis_2 = getDistance2(vec, clusters[0]);
+    size_t index = 0;
+    for(int i = 1; i < clusters.size(); i++) {
+        double temp_dis_2 = getDistance2(vec, clusters[i]);
+        if(temp_dis_2 < min_dis_2) {
+            min_dis_2 = temp_dis_2, index = i;
+        }
+    }
+    return index;
+}
+
+void KMeans::assignment(const DataSet &dataset, Tag &tag, const Clusters &clusters) {
+    for(int i = 0; i < dataset.size(); i++) {
+        tag[i] = getClusterOfMinDis(dataset[i], clusters);
+    }
+}
+
+void KMeans::update(const DataSet &dataset, const Tag &tag, Clusters &clusters) {
+
 }
