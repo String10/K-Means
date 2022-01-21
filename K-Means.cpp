@@ -8,11 +8,13 @@ class KMeans {
     typedef     std::vector <Vector>    DataSet;
     typedef     std::vector <Vector>    Clusters;
     typedef     std::vector <size_t>    Tag;
+
+    constexpr static double EPS = 1e-6;
 public:
     KMeans() = default;
     Clusters cluster(const DataSet &dataset, Tag &tag, size_t k);
 private:
-    double getDistance(const Vector &a, const Vector &b);
+    double getDistance2(const Vector &a, const Vector &b);
     double getWCSS(const DataSet &dataset, const Tag &tag, const Clusters &clusters);
     void assignment(const DataSet &dataset, Tag &tag, const Clusters &clusters);
     void update(const DataSet &dataset, const Tag &tag, Clusters &clusters);
@@ -22,6 +24,7 @@ private:
 // #include "K-Means.h"
 #include <ctime>
 #include <cstdlib>
+#include <cmath>
 #include <set>
 
 KMeans::Clusters KMeans::cluster(const DataSet &dataset, Tag &tag, size_t k) {
@@ -38,9 +41,30 @@ KMeans::Clusters KMeans::cluster(const DataSet &dataset, Tag &tag, size_t k) {
         clusters.push_back(dataset[index]);
     }
 
-    size_t iteration_count = 100, last_wcss;
+    size_t iteration_count = 100;
+    double last_wcss = 0;
     while(0 != iteration_count--) {
         assignment(dataset, tag, clusters);
         update(dataset, tag, clusters);
+
+        if(fabs(last_wcss - getWCSS(dataset, tag, clusters))) {
+            break;
+        }
     }
+
+    return clusters;
+}
+
+// a.size() must be equal to b.size().
+double KMeans::getDistance2(const Vector &a, const Vector &b) {
+    double dis = 0;
+    for(int i = 0; i < a.size(); i++) {
+        dis += (a[i] - b[i]) * (a[i] - b[i]);
+    }
+
+    return dis;
+}
+
+double KMeans::getWCSS(const DataSet &dataset, const Tag &tag, const Clusters &clusters) {
+    /* TODO: Calculate the wcss, i.e. Within-Cluster Sum of Square.  */
 }
