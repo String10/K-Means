@@ -95,5 +95,21 @@ void KMeans::assignment(const DataSet &dataset, Tag &tag, const Clusters &cluste
 }
 
 void KMeans::update(const DataSet &dataset, const Tag &tag, Clusters &clusters) {
-
+    std::vector <size_t> count(clusters.size(), 0);
+    int data_len = dataset[0].size();
+    for(int i = 0; i < clusters.size(); i++) {
+        for(auto &data: clusters[i]) {
+            data = 0;
+        }
+    }
+    for(int i = 0; i < dataset.size(); i++) {
+        for(int j = 0; j < data_len; j++) {
+            clusters[tag[i]][j] += dataset[i][j], count[tag[i]]++;
+        }
+    }
+    for(int i = 0; i < clusters.size(); i++) {
+        for(int j = 0; j < data_len; i++) {
+            clusters[i][j] /= count[i];
+        }
+    }
 }
