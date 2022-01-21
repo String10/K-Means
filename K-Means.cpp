@@ -66,5 +66,10 @@ double KMeans::getDistance2(const Vector &a, const Vector &b) {
 }
 
 double KMeans::getWCSS(const DataSet &dataset, const Tag &tag, const Clusters &clusters) {
-    /* TODO: Calculate the wcss, i.e. Within-Cluster Sum of Square.  */
+    /* DONE: Calculate the wcss, i.e. Within-Cluster Sum of Square. */
+    double wcss = 0;
+    for(int i = 0; i < dataset.size(); i++) {
+        wcss += getDistance2(dataset[i], clusters[tag[i]]);
+    }
+    return wcss;
 }
