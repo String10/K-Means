@@ -20,6 +20,8 @@ private:
     void update(const DataSet &dataset, const Tag &tag, Clusters &clusters);
 
     size_t getClusterOfMinDis(const Vector &vec, const Clusters &clusters);
+    size_t getClusterOfMinDisElkan(const Vector &vec, const Clusters &clusters,
+                                   const std::vector <std::vector <Data>> &dis_2_between_clusters);
 };
 
 // K-Means.cpp
@@ -106,9 +108,43 @@ size_t KMeans::getClusterOfMinDis(const Vector &vec, const Clusters &clusters) {
     return index;
 }
 
+size_t KMeans::getClusterOfMinDisElkan(const Vector &vec, const Clusters &clusters,
+                                       const std::vector <std::vector <Data>> &dis_2_between_clusters) {
+    double min_dis_2 = getDistance2(vec, clusters[0]);
+    size_t index = 0;
+    for(int i = 1; i < clusters.size(); i++) {
+        /* XXX: I don't know why this is 'i - index', it should be 'i - index - 1', I guess. */
+        if(dis_2_between_clusters[index][i - index] >= 2 * min_dis_2) {
+            continue;
+        }
+        double temp_dis_2 = getDistance2(vec, clusters[i]);
+        if(temp_dis_2 < min_dis_2) {
+            min_dis_2 = temp_dis_2, index = i;
+        }
+    }
+    return index;
+}
+
 void KMeans::assignment(const DataSet &dataset, Tag &tag, const Clusters &clusters) {
-    for(int i = 0; i < dataset.size(); i++) {
-        tag[i] = getClusterOfMinDis(dataset[i], clusters);
+    std::vector <std::vector <double>> dis_2_between_clusters(clusters.size());
+    if(clusters.size() <= dataset.size()) {
+        for(int i = 0; i < clusters.size(); i++) {
+            // for(int j = 0; j < i; j++) {
+            //     dis_2_between_clusters[i].push_back(dis_2_between_clusters[j][i]);
+            // }
+            // dis_2_between_clusters[i].push_back(0);
+            for(int j = i + 1; j < clusters.size(); j++) {
+                dis_2_between_clusters[i].push_back(getDistance2(clusters[i], clusters[j]));
+            }
+        }
+        for(int i = 0; i < dataset.size(); i++) {
+            tag[i] = getClusterOfMinDisElkan(dataset[i], clusters, dis_2_between_clusters);
+        }
+    }
+    else {
+        for(int i = 0; i < dataset.size(); i++) {
+            tag[i] = getClusterOfMinDis(dataset[i], clusters);
+        }
     }
 }
 
