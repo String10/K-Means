@@ -34,6 +34,9 @@ private:
 #include <algorithm>
 
 KMeans::Clusters KMeans::cluster(const DataSet &dataset, Tag &tag, size_t k) {
+    /* TODO: Use SA to optimize the selection of initial cluster */
+    /* to avoid just in locally optimal solution. */
+
     /* DONE: Forgy: Randomly select k vectors as the initial cluster. */
     srand(time(NULL));
     

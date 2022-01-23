@@ -6,6 +6,7 @@
 using namespace std;
 
 int main() {
+    /* TODO: Writing a test to compare KMeans and KMeans-with-SA. */
     vector <vector <double>> dataset, clusters;
     for(int i = 0; i < 3; i++) {
         for(int j = 0; j < 3; j++) {
