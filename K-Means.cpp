@@ -108,7 +108,7 @@ void KMeans::update(const DataSet &dataset, const Tag &tag, Clusters &clusters) 
         }
     }
     for(int i = 0; i < clusters.size(); i++) {
-        for(int j = 0; j < data_len; i++) {
+        for(int j = 0; j < data_len; j++) {
             clusters[i][j] /= count[i];
         }
     }
