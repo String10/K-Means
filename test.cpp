@@ -25,6 +25,11 @@ int main() {
         }
     }
 
+    dataset.push_back({ 5.0, 7.0 });
+    dataset.push_back({ 5.0, 8.0 });
+    dataset.push_back({ 0.0, 3.0 });
+    dataset.push_back({ 4.0, 6.0 });
+
     KMeans kmeans;
     vector <size_t> tag(dataset.size());
     clusters = kmeans.cluster(dataset, tag, 3);
