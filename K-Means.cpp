@@ -28,19 +28,37 @@ private:
 #include <cstdlib>
 #include <cmath>
 #include <set>
+#include <utility>
+#include <algorithm>
 
 KMeans::Clusters KMeans::cluster(const DataSet &dataset, Tag &tag, size_t k) {
-    /* XXX: Randomly select k vectors as the initial cluster. */
-    /* But this method may cause timeout, I think. */
+    /* DONE: Randomly select k vectors as the initial cluster. */
     srand(time(NULL));
-    std::set <size_t> selector;
-    while(selector.size() < k) {
-        selector.insert(rand() % dataset.size());
-    }
     
     Clusters clusters;
-    for(auto index: selector) {
-        clusters.push_back(dataset[index]);
+    clusters.push_back(dataset[rand() % dataset.size()]);
+    
+    std::vector <std::pair <double, size_t>> select_helper(dataset.size());
+    while(clusters.size() < k) {
+        for(int i = 0; i < dataset.size(); i++) {
+            size_t index = getClusterOfMinDis(dataset[i], clusters);
+            select_helper[i] = { getDistance2(dataset[i], clusters[index]), i };
+        }
+        std::sort(select_helper.begin(), select_helper.end(), 
+                  [](const std::pair <double, size_t> &a, const std::pair <double, size_t> &b)->bool {
+                      return (fabs(a.first - b.first) <= EPS) ? (a.second < b.second) : (a.first > b.first);
+                  });
+        size_t datasize = dataset.size();
+        for(int i = 0; i < datasize; i++) {
+            if(fabs(select_helper[i].first) <= EPS) {
+                clusters.push_back(dataset[select_helper[0].second]);
+                break;
+            }
+            if(rand() % (datasize * datasize / 2) < (datasize - i)) {
+                clusters.push_back(dataset[select_helper[i].second]);
+                break;
+            }
+        }
     }
 
     size_t iteration_count = 5e4;
