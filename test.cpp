@@ -34,14 +34,14 @@ int main() {
     vector <size_t> tag(dataset.size());
     clusters = kmeans.cluster(dataset, tag, 5);
 
-    ofstream of_log("log0.txt");
+    ofstream of_log("log1.txt");
     for(auto &vec: clusters) {
         for(auto x: vec) {
             of_log << x << ' ';
         }
         of_log << endl;
     }
-    of_log << "Normal version." << endl;
+    of_log << "SA version." << endl;
     of_log << "The final WCSS is :" << kmeans.getWCSS(dataset, tag, clusters) << endl;
     of_log.close();
 

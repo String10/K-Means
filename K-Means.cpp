@@ -39,45 +39,69 @@ KMeans::Clusters KMeans::cluster(const DataSet &dataset, Tag &tag, size_t k) {
 
     /* DONE: Forgy: Randomly select k vectors as the initial cluster. */
     srand(time(NULL));
-    
-    Clusters clusters;
-    clusters.push_back(dataset[rand() % dataset.size()]);
-    
-    std::vector <std::pair <double, size_t>> select_helper(dataset.size());
-    while(clusters.size() < k) {
-        for(int i = 0; i < dataset.size(); i++) {
-            size_t index = getClusterOfMinDis(dataset[i], clusters);
-            select_helper[i] = { getDistance2(dataset[i], clusters[index]), i };
+
+    /* SA variables. */
+    double T = 100.0;
+    constexpr double rate = 0.9;
+
+    Clusters final_clusters;
+    Tag temp_tag = tag;
+    while(fabs(T) > EPS) {
+        Clusters temp_clusters;
+        temp_clusters.push_back(dataset[rand() % dataset.size()]);
+        
+        std::vector <std::pair <double, size_t>> select_helper(dataset.size());
+        while(temp_clusters.size() < k) {
+            for(int i = 0; i < dataset.size(); i++) {
+                size_t index = getClusterOfMinDis(dataset[i], temp_clusters);
+                select_helper[i] = { getDistance2(dataset[i], temp_clusters[index]), i };
+            }
+            std::sort(select_helper.begin(), select_helper.end(), 
+                    [](const std::pair <double, size_t> &a, const std::pair <double, size_t> &b)->bool {
+                        return (fabs(a.first - b.first) <= EPS) ? (a.second < b.second) : (a.first > b.first);
+                    });
+            size_t datasize = dataset.size();
+            for(int i = 0; i < datasize; i++) {
+                if(fabs(select_helper[i].first) <= EPS) {
+                    temp_clusters.push_back(dataset[select_helper[0].second]);
+                    break;
+                }
+                if(rand() % (datasize * datasize / 2) < (datasize - i)) {
+                    temp_clusters.push_back(dataset[select_helper[i].second]);
+                    break;
+                }
+            }
         }
-        std::sort(select_helper.begin(), select_helper.end(), 
-                  [](const std::pair <double, size_t> &a, const std::pair <double, size_t> &b)->bool {
-                      return (fabs(a.first - b.first) <= EPS) ? (a.second < b.second) : (a.first > b.first);
-                  });
-        size_t datasize = dataset.size();
-        for(int i = 0; i < datasize; i++) {
-            if(fabs(select_helper[i].first) <= EPS) {
-                clusters.push_back(dataset[select_helper[0].second]);
+
+        /* If not SA, it could be 5e4. */
+        size_t iteration_count = 5e2;
+        double last_wcss = 0;
+        while(0 != iteration_count--) {
+            assignment(dataset, temp_tag, temp_clusters);
+            update(dataset, temp_tag, temp_clusters);
+
+            if(fabs(last_wcss - getWCSS(dataset, temp_tag, temp_clusters)) <= EPS) {
                 break;
             }
-            if(rand() % (datasize * datasize / 2) < (datasize - i)) {
-                clusters.push_back(dataset[select_helper[i].second]);
-                break;
+        }
+
+        if(final_clusters.empty()) {
+            final_clusters = temp_clusters, tag = temp_tag;
+        }
+        else {
+            double delta = getWCSS(dataset, temp_tag, temp_clusters) - getWCSS(dataset, tag, final_clusters);
+            if(delta <= EPS) {
+            final_clusters = temp_clusters, tag = temp_tag;
+            }
+            else if(exp(-delta / T) * RAND_MAX > rand()) {
+                final_clusters = temp_clusters, tag = temp_tag;
             }
         }
+
+        T *= rate;
     }
-
-    size_t iteration_count = 5e4;
-    double last_wcss = 0;
-    while(0 != iteration_count--) {
-        assignment(dataset, tag, clusters);
-        update(dataset, tag, clusters);
-
-        if(fabs(last_wcss - getWCSS(dataset, tag, clusters)) <= EPS) {
-            break;
-        }
-    }
-
-    return clusters;
+    
+    return final_clusters;
 }
 
 // a.size() must be equal to b.size().
