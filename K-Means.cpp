@@ -43,7 +43,7 @@ KMeans::Clusters KMeans::cluster(const DataSet &dataset, Tag &tag, size_t k) {
         clusters.push_back(dataset[index]);
     }
 
-    size_t iteration_count = 100;
+    size_t iteration_count = 5e4;
     double last_wcss = 0;
     while(0 != iteration_count--) {
         assignment(dataset, tag, clusters);
@@ -104,8 +104,9 @@ void KMeans::update(const DataSet &dataset, const Tag &tag, Clusters &clusters) 
     }
     for(int i = 0; i < dataset.size(); i++) {
         for(int j = 0; j < data_len; j++) {
-            clusters[tag[i]][j] += dataset[i][j], count[tag[i]]++;
+            clusters[tag[i]][j] += dataset[i][j];
         }
+        count[tag[i]]++;
     }
     for(int i = 0; i < clusters.size(); i++) {
         for(int j = 0; j < data_len; j++) {
