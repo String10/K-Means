@@ -32,7 +32,7 @@ private:
 #include <algorithm>
 
 KMeans::Clusters KMeans::cluster(const DataSet &dataset, Tag &tag, size_t k) {
-    /* DONE: Randomly select k vectors as the initial cluster. */
+    /* DONE: Forgy: Randomly select k vectors as the initial cluster. */
     srand(time(NULL));
     
     Clusters clusters;
