@@ -13,9 +13,9 @@ class KMeans {
 public:
     KMeans() = default;
     Clusters cluster(const DataSet &dataset, Tag &tag, size_t k);
+    double getWCSS(const DataSet &dataset, const Tag &tag, const Clusters &clusters);
 private:
     double getDistance2(const Vector &a, const Vector &b);
-    double getWCSS(const DataSet &dataset, const Tag &tag, const Clusters &clusters);
     void assignment(const DataSet &dataset, Tag &tag, const Clusters &clusters);
     void update(const DataSet &dataset, const Tag &tag, Clusters &clusters);
 
